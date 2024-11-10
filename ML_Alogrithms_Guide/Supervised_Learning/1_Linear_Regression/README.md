@@ -46,7 +46,7 @@ plt.plot(X_train, y_pred, color='red', label='Linear Regression Model')
 plt.show()
 ```
 
-![1.png](images\1.png)
+![1.png](images/1.png)
 
 ## 详细说明
 
@@ -54,7 +54,7 @@ plt.show()
 
 **安斯库姆四重奏**（Anscombe's Quartet）是一组由统计学家弗朗西斯·安斯库姆（Francis Anscombe）在 1973 年提出的数据集。它由四组不同的数据构成，尽管这些数据在许多统计属性上（如均值、方差、相关系数、线性回归直线等）非常相似，但它们的分布形态却大不相同。
 
-![2.png](images\2.png)
+![2.png](images/2.png)
 
 以上的四组数据线性回归直线完全一致，但我们明显可以发现有部分的数据并不适合这样拟合。
 
@@ -77,7 +77,7 @@ $L(w_0, w_1) = \frac{1}{n} \sum_{i=1}^{n} \left[ y_i - (b + k x_i) \right]^2$
 
 可以得到以下 $L(b, k) = \frac{1}{4} \sum_{i=1}^{4} \left[ y_i - (b + k x_i) \right]^2 = b^2 + 24.5k^2 + 9b k - 8b - 42k + 21$ 由此二次函数可得图像（w0=b，w1=k）：
 
-![3.png](images\3.png)
+![3.png](images/3.png)
 
 可以发现a点是最佳学习参数
 

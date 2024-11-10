@@ -11,7 +11,7 @@
 
 对于以下例子，数据是y = sin(2pi x)，使用多次进行线性回归。
 
-![4.png](images\4.png)
+![4.png](images/4.png)
 
 | 次数 | x     | y     |
 | ---- | ----- | ----- |
@@ -91,7 +91,7 @@ $R(w) = \sum_{i=1}^{n} \left[ y_i - (w_0 + w_1 x_i + w_2 x_i^2) \right] + \alpha
 
 Lasso 回归的惩罚项是学习参数的绝对值之和，这一点与岭回归不同。
 
-![5.png](images\5.png)
+![5.png](images/5.png)
 
 绿色是误差函数，蓝色是惩罚项。
 
