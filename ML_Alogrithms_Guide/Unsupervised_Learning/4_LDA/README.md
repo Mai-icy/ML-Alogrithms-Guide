@@ -13,8 +13,9 @@ LDA（Latent Dirichlet Allocation）是一种降维的用于文本建模的算�
 *  He read the sports columns yesterday
 
 假设这些例句主题数为2，将其应用于LDA算法。
+以下为主题A和主题B单词的概率分布：
 
-！[1.png](images/1.png)
+![1.png](images/1.png)
 
 school是主题A的代表性单词，sports是主题B的代表性单词
 
@@ -67,6 +68,6 @@ print(model.transform(tf))  # 使用主题描述的文本
 
 一些只包含数值或概括性不强的单词的主题则通过停用词（为了提高精度而排除在外的单词）来进行改进。
 
-！[1.png](images/2.png)
+![2.png](images/2.png)
 
 以上是文本的主题分布图，可以明显直观地看出是主题18的文本。
