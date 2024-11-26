@@ -265,3 +265,232 @@ r2_score(y, y_pred)
 而决定系数使用不依赖于目标变量方差，取值范围在0.0和1.0之间，即使目标变量的数量级不同，也可以将决定系数作为一般的指标使用。
 
 ## 与其他算法比较
+
+下面使用其他算法与LinearRegression比较
+
+### SVR
+
+SVR是将第二章的支持向量机应用于回归得到的算法。
+
+``` python
+from sklearn.svm import SVR
+model_svr_linear = SVR(C=0.01, kernel='linear')
+model_svr_linear.fit(X, y)
+y_svr_pred = model_svr_linear.predict(X)
+# 导入了SVR类，下面对比两种算法
+%matplotlib inline
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+ax.scatter(X, y, color='pink', marker='s', label='data set')
+ax.plot(X, y_pred, color='blue', label='LinearRegression')
+ax.plot(X, y_svr_pred, color='red', label='SVR')
+ax.legend()
+plt.show()
+```
+
+![image.png](images/3.png)
+
+``` python
+print(mean_squared_error(y, y_svr_pred))  # 均方误差
+print(r2_score(y, y_svr_pred))  # 决定系数
+print(model_svr_linear.coef_)  # 斜率
+print(model_svr_linear.intercept_)  # 截距
+#72.14197118147209
+#0.14543531775956597
+#[[1.64398]]
+#11.13520958
+```
+
+与线性回归相比，SVR的均方误差和决定系数都相对较差。
+
+通过改变SVR的C和kernel参数可以改善SVR的均方误差和决定系数。
+
+### 超参数的设置
+
+将C改为1.0，kernal改为‘rbf’。
+
+``` python
+model_svr_rbf = SVR(C=1.0, kernel='rbf')
+model_svr_rbf.fit(X, y)
+y_svr_pred = model_svr_rbf.predict(X)
+print(mean_squared_error(y, y_svr_pred))  # 均方误差
+print(r2_score(y, y_svr_pred))  # 决定系数
+#36.42126375260171
+#0.5685684051071418
+```
+
+超参数是在训练前由用户给出的，若设置得不好，模型的性能就可能会很差。
+
+## 模型的过拟合
+
+以下代码将数据集分为训练数据和用来确认性能的验证数据，如何进行SVR 的训练和预测。
+
+```python
+train_X, test_X = X[:400], X[400:]
+train_y, test_y = y[:400], y[400:]
+model_svr_rbf_1 = SVR(C=1.0, kernel='rbf')
+model_svr_rbf_1.fit(train_X, train_y)
+test_y_pred = model_svr_rbf_1.predict(test_X)
+print(mean_squared_error(test_y, test_y_pred))  # 均方误差
+print(r2_score(test_y, test_y_pred))  # 决定系数
+#69.16928620453004
+#-1.4478345530124388
+```
+
+这种对训练数据的预测效果好，但对验证数据（没用于训练的数据）的预测效果不好的现象叫做过拟合。
+
+模型对未知数据的预测能力叫做泛化能力。在解决实际问题时，这种能力非常重要。如果发生过拟合，泛化能力也会很低。
+
+## 防止过拟合的方法
+
+以乳腺癌数据集为例，“患者的身体数据”（特征）和“恶性/良性”（目标变量）是训练数据。实际应用中，对于“恶性/良性”不明的患者，重要的是能否通过患者的体检数据预测出“恶性/良性”。
+
+以下是一些代表性的方法
+
+### 将数据分为训练数据和验证数据
+
+即不使用所有的数据进行训练，留出一部分用于验证。
+
+使用scikit-learn 的 train_test_split 函数来分割函数。
+
+```python
+from sklearn.datasets import load_breast_cancer
+data = load_breast_cancer()
+X = data.data
+y = data.target
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+```
+
+* 训练用的特征值：X_train
+* 验证用的特征值：X_test
+* 训练用的目标变量：y_train
+* 验证用的目标变量：y_test
+
+分割比例没有明确规定，如果数据集很大，可以设置为6：4，如果太小，则可以设置为8：2.以上代码分割为7：3。下面是结果。
+
+![image.png](images/4.png)
+
+下面使用训练数据和验证数据来进行算法的学习，并创建模型。
+
+```python
+from sklearn.svm import SVC
+ model_svc = SVC()
+ model_svc.fit(X_train, y_train)
+ y_train_pred = model_svc.predict(X_train)
+ y_test_pred = model_svc.predict(X_test)
+ from sklearn.metrics import accuracy_score
+ print(accuracy_score(y_train, y_train_pred))
+ print(accuracy_score(y_test, y_test_pred))
+#1.0
+#0.6023391812865497
+ ```
+
+如果验证数据的正确率比训练数据低很多，说明数据发生了过拟合。上述代码对未知数据的正确率约为60%。
+
+下面使用RandomForestClassifier试一下。
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+model_rfc = RandomForestClassifier()
+model_rfc.fit(X_train, y_train)
+y_train_pred = model_rfc.predict(X_train)
+y_test_pred = model_rfc.predict(X_test)
+from sklearn.metrics import accuracy_score
+print(accuracy_score(y_train, y_train_pred))
+print(accuracy_score(y_test, y_test_pred))
+# 0.9974874371859297
+# 0.9590643274853801
+```
+
+这次对验证数据的正确率约为96%，可以说防止了过拟合。
+
+光从模型对训练数据的正确率来看，我们可能会选择SVC，但通过观察验证数据的正确率，我们会选择RandomForestClassifier。
+
+### 交叉验证
+
+如果训练数据和验证数据碰巧非常相似（或者非常不相似），则上述办法仍可能发生过拟合。为了避免这种误差，可使用不同分割方案进行多次验证，称为交叉验证。
+
+我们将数据分割5次以作例子。
+
+![image.png](images/5.png)
+
+在这个例子中，验证数据按分组顺序分别分割，但在实际应用中，验证数据是随机抽取的。
+
+#### 示例代码
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+cv = KFold(5, shuffle=True)
+model_rfc_1 = RandomForestClassifier()
+cross_val_score(model_rfc_1, X, y, cv=cv, scoring='accuracy')
+# array([0.99122807, 0.92982456, 0.94736842, 0.96491228, 0.92920354])
+```
+
+我们看到五个正确率有高有低，在选择模型时，需要考虑所有正确率的均值和方差。
+
+另外还可以输出F值的评估结果。
+
+* 通过将cross_val_score函数的scoring参数定义为f1，就可以输出F值。
+
+```python
+cross_val_score(model_rfc_1, X, y, cv=cv, scoring="f1")
+# array([0.99280576, 0.93846154, 0.97902098, 0.97297297, 0.97435897])
+```
+
+### 防止过拟合的其他方法
+* 增加训练数据
+* 减少特征值
+* 正则化
+* Early Stopping
+* 集成学习
+
+## 搜索超参数
+
+在不会发生过拟合的基础上，仔细地选择超参数，就可以进一步提高模型的性能。
+
+以下介绍搜索超参数的方法。
+
+### 使用网格搜索选择超参数
+
+网格搜索是一种自动搜索超参数的方法。其对各个超参数（事先确定的超参数）组合进行穷尽搜索。
+
+![image.png](images/6.png)
+
+#### 示例代码
+
+下面是使用scikit-learn的 GridSearchCV进行RandomForestClassifier超参数搜索的示例代码。
+GridSearchCV一边关注对验证数据的性能，一边执行超参数的搜索。
+
+```python
+from sklearn.datasets import load_breast_cancer
+data = load_breast_cancer()
+X = data.data
+y = 1 - data.target
+# 反转标签的0和1
+X = X[:, :10]
+# 以上加载了美国威斯康星州乳腺癌数据集
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
+cv = KFold(5, shuffle=True)
+param_grid = {'max_depth': [5, 10, 15], 'n_estimators': [10, 20, 30]}
+model_rfc_2 = RandomForestClassifier()
+grid_search = GridSearchCV(model_rfc_2, param_grid, cv=cv, scoring='accuracy')
+grid_search.fit(X, y)
+#网格搜索
+
+print(grid_search.best_score_)
+print(grid_search.best_params_)
+# 0.9490333919156415
+#{'max_depth': 10, 'n_estimators': 10}
+```
+
+除了交叉验证，网格搜索还支持使用F值进行评估。即将scoring参数指定为f1。
+
+```python
+grid_search = GridSearchCV(model_rfc_2, param_grid, cv=cv, scoring='f1')
+```
+
