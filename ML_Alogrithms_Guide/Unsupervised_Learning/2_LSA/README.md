@@ -97,7 +97,7 @@ $\hat{X} = \begin{bmatrix} 0.00 & -0.45 \\ 0.00 & -0.45 \\ \vdots & \vdots \\ -0
 
 假设一个使用8个变量（=单词的个数）表示的数据集，现用2个潜在变量去表示它。
 
-```
+```python
 from sklearn.decomposition import TruncatedSVD
 data = [[1, 0, 0, 0],
         [1, 0, 0, 0],

@@ -68,7 +68,7 @@ BoW（Bag of Words）词袋：由特征值构成的向量和标签的组合。
 
 因此分别为每个标签值计算每个标签条件概率的乘积
 
-### 代码
+## 示例代码
 
 ```python
 from sklearn.naive_bayes import MultinomialNB

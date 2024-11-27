@@ -21,7 +21,7 @@ $\frac{1}{n} \sum_{i=1}^{n} \left[ y_i - (b + k x_i) \right]^2$
 
 - 误差函数：能表明学习参数和误差之间的关系的函数，例如此处的均方误差。
 
-## 线性回归代码演示
+## 示例代码
 
 ```python
 from sklearn.linear_model import LinearRegression

@@ -73,7 +73,7 @@ NMF采取“将$H$视为常数，更新$W$”“ 将$W$视为常数，更新$H$�
 
 ## 示例代码
 
-```
+```python
 from sklearn.decomposition import NMF
 from sklearn.datasets.samples_generator import make_blobs
 centers = [[5, 10, 5], [10, 4, 10], [6, 8, 8]]

@@ -69,7 +69,7 @@ $y=f(w_0+w_1x_1+w_2x_2)$
 
 ![image.png](images/8.png)
 
-### 示例代码
+## 示例代码
 
 ``` python
 from sklearn.datasets import load_digits
