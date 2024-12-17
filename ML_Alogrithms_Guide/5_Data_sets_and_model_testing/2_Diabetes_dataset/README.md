@@ -16,41 +16,95 @@
 
 ## 数据预处理
 
-数据预处理的方式与线性回归相似，都是将数据集拆分位训练集和测试集两部分。下面用手写数字数据集作为例子。
+数据预处理的方式与线性回归相似，都是将数据集拆分位训练集和测试集两部分。下面用糖尿病进展预测数据集作为例子。
+
+## 数据集介绍
+Diabetes 130-US hospitals for years 1999-2008，该数据集来自 Kaggle，其详细信息包括：
+
+* 数据集内容：包含来自130家美国医院的糖尿病患者数据，收集了1999至2008年间的记录。数据包括患者的基本信息（如年龄、性别、体重等）、诊断信息（如糖尿病类型）、治疗方案、实验室结果（如血糖水平、血压等）等。
+* 目标变量：预测糖尿病的进展，通常涉及预测患者未来的血糖水平、并发症或其他健康指标的变化。
+* 特征：常见的特征包括年龄、性别、体重、饮食、生活习惯、药物使用、血糖水平、体重指数（BMI）等。
+* 使用场景：通过机器学习模型，研究人员可以预测糖尿病患者的病情变化，帮助制定个性化治疗方案。
+
+## 数据集预处理
 
 ```python
-from sklearn.datasets import load_digits
-from sklearn.neural_network import MLPClassifier
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-data = load_digits()
-X = data.images.reshape(len(data.images), -1)
-y = data.target
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+# 读取数据集
+df = pd.read_csv('diabetes_data.csv')
+# 查看数据集的前几行
+df.head()
+# 标准化数值型特征
+scaler = StandardScaler()
+df[['numerical_column1', 'numerical_column2']] = scaler.fit_transform(df[['numerical_column1', 'numerical_column2']])
+# 使用pandas的get_dummies进行独热编码
+df = pd.get_dummies(df, columns=['categorical_column'])
+# 假设目标变量是 'target_column'
+X = df.drop('target_column', axis=1)
+y = df['target_column']
+# 拆分数据集，80%作为训练集，20%作为测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
 ```
 
-* `load_digits()` 函数加载了一个包含手写数字图像（8x8像素）的数据集，其中每个图像对应一个标签，代表数字的类别（0到9）。
-* `X` 是包含所有图像特征的数据集，每一行是一个图像，形状为 (1797, 64)，即 1797 个样本，每个样本是一个 8x8 的图像（展平后是64个特征）。
-* `y` 是标签（数字0-9），形状为 (1797,)，即每个图像对应的数字标签。
+将数据集拆分为训练集（80%）和测试集（20%），确保模型训练时没有使用测试数据。
 
-将数据集拆分为训练集（70%）和测试集（30%），确保模型训练时没有使用测试数据。
-
-## 模型训练及评估
+## 模型统一训练及评估
 
 ```python
-model = model = MLPClassifier(hidden_layer_sizes=(16, ))
-model.fit(X_train, y_train)  # 训练
-y_pred = model.predict(X_test)
-accuracy_score(y_pred, y_test)  # 评估
+# 训练模型
+    model.fit(X_train, y_train)
+    # 进行预测
+    y_pred = model.predict(X_test)
+    # 评估模型
+    accuracy = accuracy_score(y_test, y_pred)
+    class_report = classification_report(y_test, y_pred)
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    # 打印评估指标
+    print("模型准确率: {:.2f}%".format(accuracy * 100))
+    print("\n分类报告:\n", class_report)
+    print("\n混淆矩阵:\n", conf_matrix)
+```
+## 测试函数
+
+```python
+def preprocess_and_train_model(data_path, model, target_column, numerical_columns, categorical_columns):
+    # 加载数据集
+    df = pd.read_csv(data_path)
+    # 查看数据集的前几行
+    print(df.head())
+    # 标准化数值型特征
+    scaler = StandardScaler()
+    df[numerical_columns] = scaler.fit_transform(df[numerical_columns])
+    # 使用pandas的get_dummies进行独热编码
+    df = pd.get_dummies(df, columns=categorical_columns)
+    # 拆分数据集
+    X = df.drop(target_column, axis=1)
+    y = df[target_column]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 训练模型
+    model.fit(X_train, y_train)
+    # 进行预测
+    y_pred = model.predict(X_test)
+    # 评估模型
+    accuracy = accuracy_score(y_test, y_pred)
+    class_report = classification_report(y_test, y_pred)
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    # 打印评估指标
+    print("模型准确率: {:.2f}%".format(accuracy * 100))
+    print("\n分类报告:\n", class_report)
+    print("\n混淆矩阵:\n", conf_matrix)
+
+    return model
 ```
 
-- `MLPClassifier` 是多层感知器分类器，用于执行神经网络分类任务。
-- `hidden_layer_sizes=(16, )` 表示模型的隐藏层具有 16 个神经元。这里只定义了一个隐藏层。
-- `model.fit(X_train, y_train)` 在训练数据上训练模型。
-- 使用训练好的模型对测试集进行预测，得到预测结果 `y_pred`。
-- `accuracy_score(y_pred, y_test)` 计算模型在测试集上的准确率，比较模型的预测结果和真实标签 `y_test`。
-
-## 支持向量机（核方法）
+<!-- ## 支持向量机（核方法）
 
 核方法（kernel methods）是一种用于处理无法人力标注特征值的复杂在数据的技巧。
 
@@ -148,5 +202,5 @@ y_pred = knn.predict(X_test)
 
 k值不同的决策边界结果哦不同
 
-![3.png](images/3.png)
+![3.png](images/3.png) -->
 
